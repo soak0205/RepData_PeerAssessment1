@@ -10,7 +10,8 @@ keep_md: true
 This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
 ### What is mean total number of steps taken per day?
-```{r}
+
+```r
 # read the activity file
 data <- read.csv("activity.csv")
 # calculate the sum
@@ -21,21 +22,38 @@ stepsTotalPerDay <- tapply(data$steps, data$date, sum, na.rm=TRUE)
 # Also note, the breaks are set at 20 to get a better spread
 hist(stepsTotalPerDay,  breaks =20, main = "Freq of number of steps per day", 
      xlab = "Number of steps per day", ylab = "Frequency", col='gray')
+```
 
+![plot of chunk unnamed-chunk-1](figure/unnamed-chunk-1-1.png) 
+
+```r
 # calculate the mean and median for the entire spread [Assignment: Calculate and report the mean and median of the total number of steps taken per day]
 mean(stepsTotalPerDay)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(stepsTotalPerDay)
+```
+
+```
+## [1] 10395
 ```
 
 
 
 ### What is the average daily activity pattern?
-```{r}
+
+```r
 library(ggplot2)
 ```
 
 
-```{r, echo=TRUE}
+
+```r
 # read in the activity data
 data <- read.csv("activity.csv")
 
@@ -59,23 +77,44 @@ plot <- plot +  geom_text(aes(x=maxsteps, label="\nmax steps", y=50), color="red
 plot
 ```
 
-Q: Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r}
-maxsteps
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
 
+Q: Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```r
+maxsteps
+```
+
+```
+## [1] 8.583333
+```
+
+```r
 cat('As time, max number of steps were on -- ', 
     as.numeric(averages[which.max(averages$steps), ])[1] %/%60,":", 
     as.numeric(averages[which.max(averages$steps), ])[1] %%60)
 ```
+
+```
+## As time, max number of steps were on --  8 : 35
+```
 ### Imputing missing values
 
-```{r}
+
+```r
 #Calculate and report the total number of missing values in the dataset
 missingvalues <- is.na(data$steps)
 table(missingvalues)
 ```
 
-```{r}
+```
+## missingvalues
+## FALSE  TRUE 
+## 15264  2304
+```
+
+
+```r
 #Fill missing values
 #function fillmissing to replace the NAs with the average calculated above where the intervals match
 fillmissing <- function(ipsteps, ipinterval) {
@@ -85,7 +124,6 @@ fillmissing <- function(ipsteps, ipinterval) {
   else {
     retval<- (averages[averages$interval == ipinterval,]$steps)
   }
-  retval
 }
 #create a copy of the data read in and use that for plotting
 newdata <- data
@@ -94,20 +132,41 @@ newdata$steps <- mapply(fillmissing, newdata$steps, newdata$interval)
 #Check missing values in new dataset
 newmissingvalues <- is.na(newdata$steps)
 table(newmissingvalues)
-
 ```
 
-```{r}
+```
+## newmissingvalues
+## FALSE 
+## 17568
+```
+
+
+```r
 # calculate the sum as before for the filled in dataset
 stepsTotalPerDayWithoutNas <- tapply(newdata$steps, newdata$date, sum, na.rm=TRUE)
 
 # plot the histogram as before, same intervals and same number of breaks.
 hist(stepsTotalPerDayWithoutNas,  breaks =20, main = "Freq of number of steps per day", 
      xlab = "Number of steps per day", ylab = "Frequency", col='blue')
+```
 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
+```r
 # calculate the mean and median for the entire spread
 mean(stepsTotalPerDayWithoutNas)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(stepsTotalPerDayWithoutNas)
+```
+
+```
+## [1] 10766.19
 ```
 
 Q: Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
@@ -116,7 +175,8 @@ The values do differ from the first part of the assignment. There were quite a f
 
 ### Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 # this part of the excercise assumes the above data 'stepsTotalPerDayWithoutNas' is present
 
 # change the date string to be a Date type
@@ -135,8 +195,9 @@ plot <- plot + geom_line() + xlab("1 hr interval in 24hrs") + ylab("average step
 plot <- plot + scale_x_continuous(breaks=0:24)
 plot <- plot + facet_wrap( ~daytype, ncol=1)
 plot
-
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 
 Observations
