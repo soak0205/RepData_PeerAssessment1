@@ -292,8 +292,9 @@ table(missingvalues)
 ## 15264  2304
 </code></pre>
 
-<p>Strategy for imputing missing data
-Find the intervals in the data where the value of steps is NA and then replace it with the average of the steps for that interval. As per the instructions &#39;new dataset that is equal to the original dataset&#39;, a new dataset is created and mapply is used to replace the NA values.</p>
+<p>Strategy for imputing missing data</p>
+
+<p>Find the intervals in the data where the value of steps is NA and then replace it with the average of the steps for that interval. As per the instructions &#39;new dataset that is equal to the original dataset&#39;, a new dataset is created and mapply is used to replace the NA values.</p>
 
 <pre><code class="r">#Fill missing values
 #function fillmissing to replace the NAs with the average calculated above where the intervals match

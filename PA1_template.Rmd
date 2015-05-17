@@ -74,6 +74,7 @@ table(missingvalues)
 ```
 
 Strategy for imputing missing data
+
 Find the intervals in the data where the value of steps is NA and then replace it with the average of the steps for that interval. As per the instructions 'new dataset that is equal to the original dataset', a new dataset is created and mapply is used to replace the NA values.
 
 
