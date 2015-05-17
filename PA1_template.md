@@ -61,17 +61,15 @@ data <- read.csv("activity.csv")
 # Example, say the raw data on row 30 has interval of 225, it should be read as 2 hrs 25 mins, which is 145 mins.
 data$interval <- 60*floor((data$interval)/100) + (data$interval %% 100)
 
-# calculate the averages [ the interval here are in mins]
-averages <- aggregate(x = list(steps = data$steps), by = list(interval = data$interval), 
-                      FUN = mean, na.rm = TRUE)
-
+# calculate the avgdata [ the interval here are in mins]
+avgdata <- aggregate(steps ~ interval, data = data, mean, na.rm = TRUE)
 # plot using ggplot. note that interval is further divided by 60 to get the graph based on 24 hr clock
-plot <- ggplot(data = averages,aes(x = interval/60, y = steps)) 
+plot <- ggplot(data = avgdata,aes(x = interval/60, y = steps)) 
 plot <- plot + geom_line() + xlab("1 hr interval in 24hrs") + ylab("average steps")
 plot <- plot + scale_x_continuous(breaks=0:24)
 
 # find the max average and plot it as a red line on the time series
-maxsteps <- as.numeric(averages[which.max(averages$steps), ]/60)[1]
+maxsteps <- as.numeric(avgdata[which.max(avgdata$steps), ]/60)[1]
 plot <- plot + geom_vline(xintercept =maxsteps , colour = 'red')
 plot <- plot +  geom_text(aes(x=maxsteps, label="\nmax steps", y=50), color="red", angle=90, text=element_text(size=2)) 
 plot
@@ -90,13 +88,13 @@ maxsteps
 ```
 
 ```r
-cat('As time, max number of steps were on -- ', 
-    as.numeric(averages[which.max(averages$steps), ])[1] %/%60,":", 
-    as.numeric(averages[which.max(averages$steps), ])[1] %%60)
+cat('As time, the 5-minute interval containing the maximum number of steps is -- ', 
+    as.numeric(avgdata[which.max(avgdata$steps), ])[1] %/%60,":", 
+    as.numeric(avgdata[which.max(avgdata$steps), ])[1] %%60)
 ```
 
 ```
-## As time, max number of steps were on --  8 : 35
+## As time, the 5-minute interval containing the maximum number of steps is --  8 : 35
 ```
 ### Imputing missing values
 
@@ -113,6 +111,10 @@ table(missingvalues)
 ## 15264  2304
 ```
 
+Strategy for imputing missing data
+Find the intervals in the data where the value of steps is NA and then replace it with the average of the steps for that interval. As per the instructions 'new dataset that is equal to the original dataset', a new dataset is created and mapply is used to replace the NA values.
+
+
 
 ```r
 #Fill missing values
@@ -122,8 +124,9 @@ fillmissing <- function(ipsteps, ipinterval) {
     retval<- ipsteps 
   }
   else {
-    retval<- (averages[averages$interval == ipinterval,]$steps)
+    retval<- (avgdata[avgdata$interval == ipinterval,]$steps)
   }
+  retval
 }
 #create a copy of the data read in and use that for plotting
 newdata <- data
@@ -186,11 +189,11 @@ newdata$date <- as.Date(newdata$date, '%Y-%m-%d')
 daytype <- factor(weekdays(newdata$date) %in% c("Saturday","Sunday"), 
                   labels=c("weekday","weekend"), ordered=FALSE)
 
-#calculate the new averages by interval and day
-newaverages <- aggregate(steps ~ interval + daytype, data = newdata, mean, na.rm = TRUE)
+#calculate the new avgdata by interval and day
+newavgdata <- aggregate(steps ~ interval + daytype, data = newdata, mean, na.rm = TRUE)
 
 #plot the graph with facet_wrap for the weekday and weekend separation
-plot <- ggplot(data = newaverages,aes(x = interval/60, y = steps)) 
+plot <- ggplot(data = newavgdata,aes(x = interval/60, y = steps)) 
 plot <- plot + geom_line() + xlab("1 hr interval in 24hrs") + ylab("average steps")
 plot <- plot + scale_x_continuous(breaks=0:24)
 plot <- plot + facet_wrap( ~daytype, ncol=1)
@@ -200,8 +203,8 @@ plot
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
 
 
-Observations
+Few Observations
 
 - The highest number of steps are on weekday
 - Overall higher activity wrt steps on weekend compared to weekdays. Also its more or less higher compared to the weekeday where the activity is more varied.
-- Weekday the number of steps step up from zero earlier around 6am compared to weekend when it starts more around 8am. Also, on weekdays, highest number of steps are between 8-9am(peak office hours), whereas over the weekend, it seems to be little later.
+- Weekday the number of steps step up from zero to a valid number earlier, around 6am, compared to weekend when it starts more around 8am. Also, on weekdays, highest number of steps are between 8-9am(peak office hours), whereas over the weekend, it seems to be little later.
